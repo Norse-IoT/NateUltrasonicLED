@@ -38,7 +38,7 @@ class Sensor {
     Sensor(int pin) {
         this->pin = pin;
         this->hasTriggered = false;
-        this->lastTriggered = 0
+        this->lastTriggered = 0;
     }
 
     static bool sensorHasTriggered(const int pin) {
@@ -70,10 +70,10 @@ class Sensor {
         }
     }
 
-    Direction compare(Sensor other) {
-        if (this->hasTriggered && other->hasTriggered) {
+    Direction compare(Sensor& other) {
+        if (this->hasTriggered && other.hasTriggered) {
             this->hasTriggered = false;  // do not detect next time
-            other->hasTriggered = false;
+            other.hasTriggered = false;
 
             if (this->lastTriggered > other.lastTriggered) {
                 return Direction::EnterRoom;
@@ -88,7 +88,7 @@ class Sensor {
     bool hasTriggered;
     unsigned long lastTriggered;
     int pin;
-}
+};
 
 void setup() {
     // begin serial port
