@@ -1,20 +1,18 @@
-#define TRIG_PIN \
-    23  // ESP32 pin GIOP23 connected to Ultrasonic Sensor's TRIG pin
+#define TRIG_PIN 32  // ESP32 pin GIOP23 connected to Ultrasonic Sensor's TRIG pin
 #define TRIG_PIN2 15
-#define ECHO_PIN \
-    33  // ESP32 pin GIOP22 connected to Ultrasonic Sensor's ECHO pin
+#define ECHO_PIN 33
+  // ESP32 pin GIOP22 connected to Ultrasonic Sensor's ECHO pin
 #define ECHO_PIN2 2
 #define SOUND_SPEED 0.017
 #define LED_PIN 25
-#define LED_PIN2 32
-#define SDA \
-    21          // Sending and recieving data for LCD display (Send Data with
+#define LED_PIN2 27
+//#define SDA 21          // Sending and recieving data for LCD display (Send Data with
                 // Acknowledge)
-#define SCL 22  // Used for the Clock signal (Serial Clock Line)
-#define DIS_THRES 125.00
+//#define SCL 22  // Used for the Clock signal (Serial Clock Line)
+#define DIS_THRES 25
 #define DIS_THRES2 125.00  // centimeters
-#define SCREEN_WIDTH 128   // OLED display width, in pixels
-#define SCREEN_HEIGHT 64   // OLED display height, in pixels
+/*#define SCREEN_WIDTH 128   // OLED display width, in pixels
+#define SCREEN_HEIGHT 64   // OLED display height, in pixels*/
 int numPeople = 0;
 
 #include <Adafruit_GFX.h>
@@ -25,7 +23,7 @@ int numPeople = 0;
 #include <string>
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 2);
+//Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, 2);
 
 enum Direction {
     EnterRoom,
@@ -54,12 +52,13 @@ class Sensor {
         float distance_cm = SOUND_SPEED * duration_us;
 
         // print the value to Serial Monitor
-        Serial.print("distance for pin ");
+       /* Serial.print("distance for pin ");
         Serial.print(pin);
         Serial.print(": ");
         Serial.print(distance_cm);
         Serial.print(" cm  ");
         Serial.println(DIS_THRES);
+        */
         return distance_cm < DIS_THRES;
     }
 
@@ -104,7 +103,7 @@ void setup() {
     pinMode(LED_PIN, OUTPUT);
     pinMode(LED_PIN2, OUTPUT);
 
-    if (!display.begin(SSD1306_SWITCHCAPVCC,
+    /*if (!display.begin(SSD1306_SWITCHCAPVCC,
                        0x3C)) {  // Address 0x3D for 128x32
         Serial.println("SSD1306 alloction failed");
         for (;;)
@@ -120,7 +119,7 @@ void setup() {
 
     display.println("Number of People: \n");
     display.println(numPeople);
-    display.display();
+    display.display();*/
 
     Sensor sensor1(LED_PIN);
     Sensor sensor2(LED_PIN2);
@@ -128,16 +127,20 @@ void setup() {
     while (true) {  // loop
         sensor1.detect();
         sensor2.detect();
+        Serial.println("Number of People: \n");
+        Serial.println(numPeople);
 
         switch (sensor1.compare(sensor2)) {
         EnterRoom:
             Serial.println("EnterRoom");
+            numPeople++;
             break;
         ExitRoom:
             Serial.println("ExitRoom");
+            numPeople--;
             break;
         Neither:
-            Serial.println("Neither");
+           // Serial.println("Neither");
             break;
         }
     }
