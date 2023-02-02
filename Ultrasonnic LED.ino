@@ -9,12 +9,9 @@
 //#define SDA 21          // Sending and recieving data for LCD display (Send Data with
 // Acknowledge)
 //#define SCL 22  // Used for the Clock signal (Serial Clock Line)
-#define DIS_THRES 25
-#define DIS_THRES2 125.00  // centimeters
+#define DIS_THRES 125
 /*#define SCREEN_WIDTH 128   // OLED display width, in pixels
-#define SCREEN_HEIGHT 64   // OLED display height, in pixels*/
-int numPeople = 0;
-
+ #define SCREEN_HEIGHT 64   // OLED display height, in pixels*/
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
@@ -55,13 +52,13 @@ public:
     bool trigger = distance_cm < DIS_THRES;
 
     // print the value to Serial Monitor
-    if (trigger) {
-      Serial.print(this->triggerPin);
-      Serial.print(" has triggered: ");
-      Serial.print(distance_cm);
-      Serial.print(" cm < ");
-      Serial.println(DIS_THRES);
-    }
+    //  if (trigger) {
+    //    Serial.print(this->triggerPin);
+    //    Serial.print(" has triggered: ");
+    //    Serial.print(distance_cm);
+    //    Serial.print(" cm < ");
+    //    Serial.println(DIS_THRES);
+    //  }
     return trigger;
   }
 
@@ -78,8 +75,10 @@ public:
       other.hasTriggered = false;
 
       if (this->lastTriggered > other.lastTriggered) {
+        // Serial.println("ENTER ROOM");
         return Direction::EnterRoom;
       } else {
+        // Serial.println("EXIT ROOM");
         return Direction::ExitRoom;
       }
     } else {
@@ -108,44 +107,48 @@ void setup() {
   pinMode(LED_PIN2, OUTPUT);
 
   /*if (!display.begin(SSD1306_SWITCHCAPVCC,
-                       0x3C)) {  // Address 0x3D for 128x32
-        Serial.println("SSD1306 alloction failed");
-        for (;;)
-            ;  // Don't proceed, loop forever
-    }
-    delay(2000);
-    display.clearDisplay();
+                        0x3C)) {  // Address 0x3D for 128x32
+         Serial.println("SSD1306 alloction failed");
+         for (;;)
+             ;  // Don't proceed, loop forever
+     }
+     delay(2000);
+     display.clearDisplay();
 
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    // display static text
+     display.setTextSize(2);
+     display.setTextColor(WHITE);
+     display.setCursor(0, 0);
+     // display static text
 
-    display.println("Number of People: \n");
-    display.println(numPeople);
-    display.display();*/
+     display.println("Number of People: \n");
+     display.println(numPeople);
+     display.display();*/
 
-  Sensor sensor1(LED_PIN, ECHO_PIN);
-  Sensor sensor2(LED_PIN2, ECHO_PIN2);
-
+  Sensor sensor1(TRIG_PIN, ECHO_PIN);
+  Sensor sensor2(TRIG_PIN2, ECHO_PIN2);
+  int numPeople = 0;
   while (true) {  // loop
     sensor1.detect();
     sensor2.detect();
-    // Serial.println("Number of People: \n");
-    // Serial.println(numPeople);
+    Serial.print("Number of People:");
+    Serial.println(numPeople);
 
+    if (numPeople < 0)
+      numPeople = 0;
+
+    const int delayAmount = 5000;
     switch (sensor1.compare(sensor2)) {
-EnterRoom:
-      Serial.println("EnterRoom");
-      numPeople++;
-      break;
-ExitRoom:
-      Serial.println("ExitRoom");
-      numPeople--;
-      break;
-Neither:
-      // Serial.println("Neither");
-      break;
+      case EnterRoom:
+        numPeople++;
+        delay(delayAmount);
+        break;
+      case ExitRoom:
+        numPeople--;
+        delay(delayAmount);
+        break;
+      case Neither:
+        // Serial.println("Neither");
+        break;
     }
   }
 }
